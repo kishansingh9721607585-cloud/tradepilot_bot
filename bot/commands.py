@@ -71,13 +71,26 @@ async def signal(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         stock = context.args[0].upper()
 
-        if '.NS' not in stock:
-            stock += '.NS'
+        test_symbols = [
+            f"{stock}.NS",
+            stock
+        ]
 
-        result = generate_signal(stock)
+        result = None
 
-        if 'error' in result:
-            await update.message.reply_text(result['error'])
+        for symbol in test_symbols:
+
+            result = generate_signal(symbol)
+
+            if "error" not in result:
+                break
+
+        if "error" in result:
+
+            await update.message.reply_text(
+                "❌ No market data found"
+            )
+
             return
 
         emoji = {
@@ -101,10 +114,12 @@ Reason:
 
         await update.message.reply_text(msg)
 
-    except:
+    except Exception as e:
+
+        print(e)
 
         await update.message.reply_text(
-            "Example:\n/signal reliance"
+            "Usage:\n/signal reliance"
         )
 
 
