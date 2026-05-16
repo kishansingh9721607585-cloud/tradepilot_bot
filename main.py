@@ -60,17 +60,4 @@ def run_bot():
 
 
 if __name__ == "__main__":
-
-    # Start telegram bot in background
-    bot_thread = Thread(target=run_bot)
-    bot_thread.start()
-
-    # Start Flask web server
-    port = int(os.environ.get("PORT", 10000))
-
-    web_app.run(
-        host="0.0.0.0",
-        port=port,
-        debug=False,
-        use_reloader=False
-    )
+    run_bot()
