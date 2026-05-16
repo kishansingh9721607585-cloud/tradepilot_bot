@@ -1,3 +1,7 @@
+from flask import Flask
+import os
+import threading
+
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler
@@ -21,7 +25,16 @@ from bot.commands import (
 from bot.scheduler import start_scheduler
 
 
-def main():
+# Flask app for Render port binding
+web_app = Flask(__name__)
+
+@web_app.route("/")
+def home():
+    return "Trading Bot is running!"
+
+
+# Telegram bot function
+def run_bot():
     app = ApplicationBuilder().token(BOT_TOKEN).build()
 
     app.add_handler(CommandHandler('start', start))
@@ -39,8 +52,14 @@ def main():
 
     start_scheduler(app)
 
-    app.run_polling()
+    # IMPORTANT FIX
+    app.run_polling(drop_pending_updates=True)
 
 
 if __name__ == '__main__':
-    main()
+    # Run telegram bot in separate thread
+    threading.Thread(target=run_bot).start()
+
+    # Open Render required port
+    port = int(os.environ.get("PORT", 10000))
+    web_app.run(host="0.0.0.0", port=port)
