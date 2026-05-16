@@ -25,7 +25,7 @@ from bot.commands import (
 from bot.scheduler import start_scheduler
 
 
-# Flask app
+# Flask app for Render health check
 web_app = Flask(__name__)
 
 @web_app.route('/')
@@ -33,11 +33,24 @@ def home():
     return "Bot is running!"
 
 
-# Telegram bot function
+# Function to run Flask server
+def run_flask():
+    port = int(os.environ.get("PORT", 10000))
+
+    web_app.run(
+        host="0.0.0.0",
+        port=port,
+        debug=False,
+        use_reloader=False
+    )
+
+
+# Function to run Telegram bot
 def run_bot():
 
     app = ApplicationBuilder().token(BOT_TOKEN).build()
 
+    # Command handlers
     app.add_handler(CommandHandler('start', start))
     app.add_handler(CommandHandler('help', help_command))
     app.add_handler(CommandHandler('market', market))
@@ -51,13 +64,22 @@ def run_bot():
 
     print("🚀 Trading Bot Running...")
 
-    # start_scheduler(app)
+    # Optional scheduler
+    try:
+        start_scheduler(app)
+        print("✅ Scheduler started")
+    except Exception as e:
+        print("Scheduler Error:", e)
 
-    print("BOT TOKEN:", BOT_TOKEN)
-    print("Polling started")
-
+    # Start polling
     app.run_polling(drop_pending_updates=True)
 
 
 if __name__ == "__main__":
+
+    # Start Flask in background thread
+    flask_thread = Thread(target=run_flask)
+    flask_thread.start()
+
+    # Run bot in main thread
     run_bot()
