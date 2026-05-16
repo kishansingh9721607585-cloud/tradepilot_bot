@@ -51,7 +51,10 @@ def run_bot():
 
     print("🚀 Trading Bot Running...")
 
-    start_scheduler(app)
+    # start_scheduler(app)
+
+    print("BOT TOKEN:", BOT_TOKEN)
+    print("Polling started")
 
     app.run_polling(drop_pending_updates=True)
 
